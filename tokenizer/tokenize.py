@@ -38,9 +38,12 @@ def make_tokens(text, model_name="wp-mecab"):
         #text를 형태소로 분절 및 결합
         morphs = mecab.morphs(text)
         text = " ".join(morphs)
-        
-    #텍스트를 토크나이즈
-    tokens = tokenizer.tokenize(text)
+        #텍스트를 토크나이즈
+        tokens = ' '.join(tokenizer.tokenize(text))
+        return text, tokens
     
-    return tokens
+    else:
+        #텍스트를 토크나이즈
+        tokens = ' '.join(tokenizer.tokenize(text))
+        return tokens
     
