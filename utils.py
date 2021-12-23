@@ -10,14 +10,14 @@ from sklearn import metrics as sklearn_metrics
 
 import transformers
 from transformers import PreTrainedTokenizer
+from tokenizer import make_tokens
 
 logger = logging.getLogger(__name__)
 
 #ner 데이터를 읽고, 라벨 리스트, 문장, 라벨 반환
-def make_ner_data(file_path: str, tokenizer: PreTrainedTokenizer, max_length: int):
+def make_ner_data(file_path: str, tokenizer: PreTrainedTokenizer, texts = None):
     #label_list 작성
-    entity_label_list = 
-        ['O', 
+    entity_label_list = ['O', 
          'B-DUR', 'I-DUR', 
          'B-DAT', 'I-DAT', 
          'B-LOC', 'I-LOC', 
@@ -31,32 +31,27 @@ def make_ner_data(file_path: str, tokenizer: PreTrainedTokenizer, max_length: in
     
 
     dataset_list = []
-    with open(file_path, 'r', encoding='utf-8') as lines:
-        for i, line in enumerate(lines):
-            if i > 0:
-                _, _, sentence, label_str = line.strip().split('\t')
-                dataset = {
-                    "sentence" : sentence,
-                    "label_str" : label_str
-                }
-                dataset_list.append(dataset)
+    if file_path:
+        with open(file_path, 'r', encoding='utf-8') as lines:
+            for i, line in enumerate(lines):
+                if i > 0:
+                    _, _, sentence, label_str = line.strip().split('\t')
+                    dataset = {
+                        "sentence" : sentence,
+                        "label_str" : label_str
+                    }
+                    dataset_list.append(dataset)
+    else:#입력받은 text를 형태소 단위로 분리
+        for text in texts:
+            tokens = make_tokens(text=text,model_name="wp-mecab")
+            sentence = ' '.join(tokens)
+            dataset = {
+                "sentence" : sentence,
+                "label_str" : None
+            }
+            dataset_list.append(dataset)
                 
-    return entity_label_list, dataset_list
-    
-    
-def init_logger():
-    logging.basicConfig(
-        format="%(asctime)s - %(levelname)s - %(name)s -   %(message)s",
-        datefmt="%m/%d/%Y %H:%M:%S",
-        level=logging.INFO,
-    )
-
-def format_time(elapsed): 
-    #반올림
-    elapsed_rounded = int(round((elapsed)))
-    
-    #hh:mm 형태로 변경
-    return str(datetime.timedelta(seconds=elapsed_rounded))    
+    return entity_label_list, dataset_list  
 
 def set_seed(args):
     random.seed(args.seed)
