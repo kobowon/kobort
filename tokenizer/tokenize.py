@@ -7,6 +7,9 @@ wordpiece_mecab_info = {"vocab_path" : "tokenizer/model/wordpiece_mecab/version_
 
 sentencepiece_mecab_info = {"vocab_path" : "tokenizer/model/sentencepiece_mecab/version_0.1/version_0.1.model"}
 
+# def load_tokenizer(model_name="wp-mecab"):
+    
+
 
 def make_tokens(text, model_name="wp-mecab"):
     if model_name == "sp-mecab":
@@ -33,14 +36,16 @@ def make_tokens(text, model_name="wp-mecab"):
                                               mask_token='<mask>',
                                               use_fast=True)
     
-    if "mecab" in model_name:
+    if "mecab" in model_name or model_name=="mecab":
         mecab = Mecab()
         #text를 형태소로 분절 및 결합
         morphs = mecab.morphs(text)
         text = " ".join(morphs)
+        if model_name == "mecab":
+            return text
         
     #텍스트를 토크나이즈
-    tokens = tokenizer.tokenize(text)
+    tokens, origin_tokens = tokenizer.tokenize(text)
     
-    return tokens
+    return tokens, origin_tokens
     
