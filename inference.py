@@ -20,7 +20,7 @@ def infer(args):
                                               cls_token='<s>',
                                               mask_token='<mask>',
                                              )
-    infer_texts = ["지난 14일 방송된 KBS 2TV '불후의 명곡' 왕중왕전에서는 '쇼쇼쇼, 별들의 귀환' 2편이 꾸며졌다.",'뛟뚫뗍은 뛟뚫뗍한테 오늘 뛟뚫뗍에 갔다고 말했다',"딿뗍뚫는 오늘 딿뗍뚫에 갔다"]
+    infer_texts = ["지난 14일 방송된 KBS 2TV '불후의 명곡' 왕중왕전에서는 '쇼쇼쇼, 별들의 귀환' 2편이 꾸며졌다.",'뛟뚫뗍은 뛟뚫뗍한테 오늘 뛟뚫뗍에 갔다고 말했다',"딿뗍뚫는 오늘 딿뗍뚫에 갔다", "존슨&존슨은 제약회사이다", "장동민 고소, KBS 쿨 FM 하차…조정치 도희 임시 DJ 맡아 최근 여성 비하성 발언으로 논란이 되며 무한도전 ‘식스맨’을 자진 하차한 장동민이 고소를 당한 것으로 알려졌다." ]
     
     #Build dataloader
     entity_label_list, inference_data = make_ner_data(file_path=None,
@@ -87,8 +87,8 @@ def infer(args):
             print(f'{token_idx}번째 토큰 "{original_tokens[token_idx]}→{tokens_with_unk[token_idx]}"의 라벨은 "{pred_label_str}"입니다')
     
         print(f"\n원문장 : {origin_text}")
-        print(f"토크나이즈된 <unk> 미포함 문장 : {original_tokens}")
-        print(f"토크나이즈된 <unk> 포함 문장 : {tokens_with_unk}")
+        print(f"토크나이즈된 <unk> 미포함 문장 : {_original_tokens}")
+        print(f"토크나이즈된 <unk> 포함 문장 : {_tokens_with_unk}")
         print(f"토큰에 대한 라벨 리스트 : {origin_tokens_labels}") 
         
         ner_tagged_sentence, ner_tagged_id_list = return_ner_tagged_sentence_plus(origin_text, _original_tokens,origin_tokens_labels)

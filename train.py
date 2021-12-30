@@ -10,7 +10,7 @@ from transformers import RobertaForTokenClassification, AdamW, RobertaConfig
 from transformers import get_linear_schedule_with_warmup
 from fastprogress.fastprogress import master_bar, progress_bar
 
-os.environ["CUDA_VISIBLE_DEVICES"]="1"
+os.environ["CUDA_VISIBLE_DEVICES"]="2"
 
 def train(args):
     #Set GPU
@@ -99,7 +99,7 @@ def train(args):
             scheduler.step()
         
         train_loss = train_loss / len(train_dataloader)
-        print(f"epoch : {epoch}, loss : {train_loss}")
+        print(f"epoch : {epoch+1}, loss : {train_loss}")
         
         f1_score, candidate_model = evaluate(args,
                                              model=model,
@@ -231,25 +231,25 @@ if __name__ == "__main__":
     parser.add_argument(
         "--train_file",
         type=str,
-        default="/data/bowon_ko/data/tmax_ner/version0.1/train.tsv"
+        default="/data/bowon_ko/data/tmax_ner/version0.2/train.tsv"
     )
     
     parser.add_argument(
         "--dev_file",
         type=str,
-        default="/data/bowon_ko/data/tmax_ner/version0.1/dev.tsv"
+        default="/data/bowon_ko/data/tmax_ner/version0.2/dev.tsv"
     )
     
     parser.add_argument(
         "--test_file",
         type=str,
-        default="/data/bowon_ko/data/tmax_ner/version0.1/test.tsv"
+        default="/data/bowon_ko/data/tmax_ner/version0.2/test.tsv"
     )
     
     parser.add_argument(
     "--batch_size",
     type=int,
-    default=64,
+    default=32,
     help="input batch size for train",
     )
     
@@ -277,7 +277,14 @@ if __name__ == "__main__":
         default=0.06
     )
     
+    parser.add_argument(
+        "--seed",
+        type=int,
+        default=42
+    )
+    
     args = parser.parse_args()
+    set_seed(args)
     train(args)
     
     
