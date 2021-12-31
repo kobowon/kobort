@@ -10,7 +10,7 @@ from transformers import RobertaForTokenClassification, AdamW, RobertaConfig
 from transformers import get_linear_schedule_with_warmup
 from fastprogress.fastprogress import master_bar, progress_bar
 
-os.environ["CUDA_VISIBLE_DEVICES"]="2"
+os.environ["CUDA_VISIBLE_DEVICES"]="1"
 
 def train(args):
     #Set GPU
@@ -231,19 +231,19 @@ if __name__ == "__main__":
     parser.add_argument(
         "--train_file",
         type=str,
-        default="/data/bowon_ko/data/tmax_ner/version0.2/train.tsv"
+        default="/data/bowon_ko/data/tmax_ner/version0.3/train.tsv"
     )
     
     parser.add_argument(
         "--dev_file",
         type=str,
-        default="/data/bowon_ko/data/tmax_ner/version0.2/dev.tsv"
+        default="/data/bowon_ko/data/tmax_ner/version0.3/val.tsv"
     )
     
     parser.add_argument(
         "--test_file",
         type=str,
-        default="/data/bowon_ko/data/tmax_ner/version0.2/test.tsv"
+        default="/data/bowon_ko/data/tmax_ner/version0.3/test.tsv"
     )
     
     parser.add_argument(

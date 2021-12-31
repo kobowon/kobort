@@ -17,8 +17,6 @@ logger = logging.getLogger(__name__)
 #dummy file 을 split해서 train, dev, test file로 변환
 #input : dummy file
 #output : train.tsv, dev.tsv, test.tsv
-def construct_ner_file(file_path:str):
-    
 
 #ner 파일을 읽고, 라벨 리스트, 문장, 라벨 반환
 def make_ner_data(file_path: str, tokenizer: PreTrainedTokenizer, texts = None):
@@ -41,7 +39,7 @@ def make_ner_data(file_path: str, tokenizer: PreTrainedTokenizer, texts = None):
         with open(file_path, 'r', encoding='utf-8') as lines:
             for i, line in enumerate(lines):
                 if i > 0:
-                    _, _, sentence, label_str = line.strip().split('\t')
+                    _, sentence, label_str = line.strip().split('\t')
                     dataset = {
                         "sentence" : sentence,
                         "label_str" : label_str
