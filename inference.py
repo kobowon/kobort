@@ -71,8 +71,8 @@ def infer(args):
         print("***********************************************************")
         origin_text = infer_texts[batch_idx]
         #원래 문장 <s> </s> 포함 안 된 문장
-        _original_tokens = inference_data[batch_idx]["sentence"].split()
-        _tokens_with_unk = inference_data[batch_idx]["sentence_with_unk"].split()
+        _original_tokens = inference_data[batch_idx]["tokenized_text"].split()
+        _tokens_with_unk = inference_data[batch_idx]["tokenized_text_with_unk"].split()
         assert len(_original_tokens) == len(_tokens_with_unk)
         original_tokens = ['<s>'] + _original_tokens + ['</s>']
         tokens_with_unk = ['<s>'] + _tokens_with_unk + ['</s>']

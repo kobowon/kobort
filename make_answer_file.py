@@ -9,7 +9,7 @@ tokens : tokenization 과정을 거치고 <unk>인 경우를 <unk>으로 변경�
 labels : origin_tokens, tokens에 대한 라벨
 '''
 
-def return_ner_tagged_sentence_plus(origin_text, tokens, labels):
+def return_ner_tagged_sentence_plus(origin_text, origin_tokens, labels):
     ner_tagged_sentence = ''
     ner_tagged_id_list = []
     
@@ -117,33 +117,34 @@ def return_ner_tagged_sentence_plus(origin_text, tokens, labels):
     return ner_tagged_sentence, ner_tagged_id_list
 
 answers = []
-with open("data/test.tsv", "r", encoding="utf-8") as f:
+with open("jupyter/data/test.tsv", "r", encoding="utf-8") as f:
     lines = csv.reader(f, delimiter='\t',)
     for i, line in enumerate(lines):
         if i>0:
             #print(line)
-            origin_text, _, _, label_str = line
-            morphed_text = make_tokens(origin_text, model_name="mecab")
-            tokens, origin_tokens = make_tokens(origin_text, model_name="wp-mecab")
-            tokens_text = ' '.join(tokens)
-            origin_tokens_text = ' '.join(origin_tokens)
+            origin_text, tokens_str, label_str = line
+            #morphed_text = make_tokens(origin_text, model_name="mecab")
+            #tokens, origin_tokens = make_tokens(origin_text, model_name="wp-mecab")
+            #tokens_text = ' '.join(tokens)
+            #origin_tokens_text = ' '.join(origin_tokens)
+            tokens = tokens_str.split()
             labels = label_str.split()
-            tagged_sentence, tagged_id_list = return_ner_tagged_sentence_plus(origin_text, origin_tokens, labels)
+            tagged_sentence, tagged_id_list = return_ner_tagged_sentence_plus(origin_text, tokens, labels)
 
             
-            answers.append([origin_text, morphed_text, tokens_text, origin_tokens_text, label_str, tagged_sentence])
+            answers.append([origin_text, tagged_sentence])
 
 for i, answer in enumerate(answers):
     if i<2:
-        print(answer[0], answer[1], answer[2], answer[3])
+        print(answer[0], answer[1])
 
    
         
-with open("data/answer2.tsv", "w", encoding="utf-8") as f:
-    field_names = ["original_text", "morphed_text", "tokens_text", "origin_tokens_text", "bio_tagging", "ner_tagged_text"]
+with open("jupyter/data/answer.tsv", "w", encoding="utf-8") as f:
+    field_names = ["original_text", "ner_tagged_text"]
     writer = csv.writer(f, delimiter='\t')
     writer.writerow(field_names)
     for answer in answers:
-        writer.writerow([answer[0], answer[1], answer[2], answer[3], answer[4], answer[5]])
+        writer.writerow([answer[0], answer[1]])
 
         

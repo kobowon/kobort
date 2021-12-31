@@ -18,7 +18,7 @@ class NerDataset(Dataset):
         sampler = None,
         **kwargs
     ):
-        #__getitem__ 을 위한 객체이고, __getitem__ 을 통해 얻어지는 데이터들의 리스트(정확히 말하면 iterator)는 collate_fn Class의 __call__ 함수에 들어갈 첫 번째 인자가 됨
+        #__getitem__ 을 위한 객체이고, __getitem__ 을 통해 얻어지는 데이터 batch_size개를 포함한 리스트(정확히 말하면 iterator)는 collate_fn Class의 __call__ 함수에 들어갈 첫 번째 인자가 됨
         self.dataset = dataset #List[Union[Dict (여러 값을 담을 수 있음), 특정 값]]
         self.tokenizer = tokenizer
         self.max_length = max_length
@@ -69,10 +69,6 @@ class CollateNer:
     #[TODO] self.tokenizer.batch_encode_plus 메서드를 이용해 리펙토링 예정
     #loader call될 떄마다 call되는 거 같음
     def __call__(self, batches):
-        
-        #이렇게 가져오면 안 되나?
-        #sentence_list, label_str_list = batches 
-        
         total_input_ids = []
         total_input_attention_mask = []
         total_input_labels_ids = []
@@ -129,9 +125,9 @@ class CollateNer:
         #tensor를 담은 리스트를 리스트를 담은 tensor로 변환
         tensor_ids = torch.stack(total_input_ids)
         tensor_masks = torch.stack(total_input_attention_mask)
-        if label_str:
-            tensor_labels = torch.stack(total_input_labels_ids)
         
         if label_str:
+            tensor_labels = torch.stack(total_input_labels_ids)
             return tensor_ids, tensor_masks, tensor_labels
+            
         return tensor_ids, tensor_masks
