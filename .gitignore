@@ -1,6 +1,7 @@
 #Data
 jupyter/data/
 jupyter/rawdata/
+jupyter/parsed_data/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
