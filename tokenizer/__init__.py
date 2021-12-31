@@ -1,1 +1,1 @@
-from .tokenize import make_tokens
+from .tokenize import KobortTokenizer

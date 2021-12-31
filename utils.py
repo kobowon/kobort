@@ -9,8 +9,7 @@ from seqeval import metrics as seqeval_metrics
 from sklearn import metrics as sklearn_metrics
 
 import transformers
-from transformers import PreTrainedTokenizer
-from tokenizer import make_tokens
+from tokenizer import KobortTokenizer
 import os
 import re
 import json
@@ -74,7 +73,7 @@ def kmou_ner_parser():
         for line in lines:
             whole_data["whole_data"].append((index_parser(line.split("\t")[0], line.split("\t")[1])))
 
-    with open("./jupyter/NER_wholedata_parsed.json", "w") as json_file:
+    with open("./jupyter/parsed_data/NER_wholedata_parsed.json", "w") as json_file:
         json.dump(whole_data, json_file)
 
     os.remove(rawdata_dir + "/NER_wholedata.txt")
@@ -305,7 +304,8 @@ class RestoreOutput(object):
     
 def split_data(df, ratio, labels, get_val=True):
     data_idxs = [i for i in range(len(df))]
-    random.Random(7).shuffle(data_idxs)
+    SEED = 7
+    random.Random(SEED).shuffle(data_idxs)
     tcnt = 2 if get_val else 1
     data = []
     while tcnt > 0:
@@ -335,9 +335,11 @@ def BIO_processor():
     whole_data = defaultdict(list)
     bt = BioTagging()
     count_unsuitable, count_suitable = 0, 0
-    with open('./jupyter/rawdata/NER_wholedata_parsed.json', 'r') as f:
+    with open('./jupyter/parsed_data/NER_wholedata_parsed.json', 'r') as f:
         data = json.load(f)
     rg = len(data['whole_data'])
+    
+    tokenizer = KobortTokenizer("wp-mecab")
     for k in tqdm(range(rg)):
         d = data['whole_data'][k]
         og_text = d['raw_text'] 
@@ -350,9 +352,7 @@ def BIO_processor():
         if flag:
             continue
         # text를 형태소로 분절 및 결합        
-        
-        tokens_with_unk, tokens_without_unk = make_tokens(text=og_text,model_name="wp-mecab")
-        mecab_text = make_tokens(text=og_text, model_name = 'mecab')
+        tokens_with_unk, tokens_without_unk, mecab_text = tokenizer.tokenize(og_text)
         tok = tokens_without_unk
         #tokenized_text_with_unk = tokens_with_unk
               
@@ -361,8 +361,7 @@ def BIO_processor():
         
         text, entity = morph_res['text'], morph_res["entity"]
         res = bt.bio_tagging(og_text, text, tok, 
-                             entity, tok_encode, 
-                             filters)
+                             entity, filters)
         if res:
             count_suitable += 1
             for key, value in res.items():
@@ -391,17 +390,18 @@ def BIO_processor():
         json.dump(bt.bio_label, w)
 
     wd = pd.DataFrame(whole_data)
-              
-    train_df, test_df, val_df = split_data(wd, 0.1, bt.bio_label, get_val=True)
-    train_df[['original_text', 'tokenize', 'bio_tagging']].to_csv('./jupyter/train.tsv', index = False, sep='\t')
-    test_df[['original_text', 'tokenize', 'bio_tagging']].to_csv('./jupyter/test.tsv', index = False, sep='\t')
-    val_df[['original_text', 'tokenize', 'bio_tagging']].to_csv('./jupyter/val.tsv', index = False, sep='\t')
+    wd.to_csv('./check.csv', index=False)
+    lb = ['ORG','PER','POH','NOH','DAT','LOC','DUR','MNY','PNT','TIM']
+    train_df, test_df, val_df = split_data(wd, 0.1, lb, get_val=True)
+    train_df[['original_text', 'tokenize', 'bio_tagging']].to_csv('./jupyter/data/train.tsv', index = False, sep='\t')
+    test_df[['original_text', 'tokenize', 'bio_tagging']].to_csv('./jupyter/data/test.tsv', index = False, sep='\t')
+    val_df[['original_text', 'tokenize', 'bio_tagging']].to_csv('./jupyter/data/val.tsv', index = False, sep='\t')
               
     print("Making BIO Tagging Data is Completed.")
 
 
 #ner 파일을 읽고, 라벨 리스트, 문장, 라벨 반환
-def make_ner_data(file_path: str, tokenizer: PreTrainedTokenizer, texts = None):
+def make_ner_data(file_path: str, tokenizer: KobortTokenizer, texts = None):
     #label_list 작성
     entity_label_list = ['O', 
          'B-DUR', 'I-DUR', 
@@ -429,11 +429,12 @@ def make_ner_data(file_path: str, tokenizer: PreTrainedTokenizer, texts = None):
                     dataset_list.append(dataset)
     else:#inference 시에 입력이 들어올 때
         for text in texts:
-            tokens_with_unk, tokens_without_unk = make_tokens(text=text,model_name="wp-mecab")
-            tokenized_text = ' '.join(tokens_without_unk)
+            tokenizer = KobortTokenizer("wp-mecab")
+            tokens_with_unk, tokens_without_unk, _ = tokenizer.tokenize(text)
+            tokenized_text_without_unk = ' '.join(tokens_without_unk)
             tokenized_text_with_unk = ' '.join(tokens_with_unk)
             dataset = {
-                "tokenized_text" : tokenized_text,
+                "tokenized_text" : tokenized_text_without_unk,
                 "tokenized_text_with_unk" : tokenized_text_with_unk,
                 "label_str" : None
             }
