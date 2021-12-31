@@ -1,4 +1,5 @@
 ```
-from tokenizer import make_tokens
-tokens_with_unk, tokens = make_tokens("나는 오늘 밥을 먹었다","wp-mecab")
+from tokenizer import KobortTokenizer
+tokenizer = KobortTokenizer("wp-mecab")
+tokenizer.tokenize("보원이는 밥을 먹었다")
 ```
