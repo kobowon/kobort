@@ -20,7 +20,7 @@ def infer(args):
                                               cls_token='<s>',
                                               mask_token='<mask>',
                                              )
-    infer_texts = ["지난 14일 방송된 KBS 2TV '불후의 명곡' 왕중왕전에서는 '쇼쇼쇼, 별들의 귀환' 2편이 꾸며졌다.",'뛟뚫뗍은 뛟뚫뗍한테 오늘 뛟뚫뗍에 갔다고 말했다',"딿뗍뚫는 오늘 딿뗍뚫에 갔다", "존슨&존슨은 제약회사이다", "장동민 고소, KBS 쿨 FM 하차…조정치 도희 임시 DJ 맡아 최근 여성 비하성 발언으로 논란이 되며 무한도전 ‘식스맨’을 자진 하차한 장동민이 고소를 당한 것으로 알려졌다." ]
+    infer_texts = ["지난 14일 방송된 KBS 2TV '불후의 명곡' 왕중왕전에서는 '쇼쇼쇼, 별들의 귀환' 2편이 꾸며졌다.", "장동민 고소, KBS 쿨 FM 하차…조정치 도희 임시 DJ 맡아 최근 여성 비하성 발언으로 논란이 되며 무한도전 ‘식스맨’을 자진 하차한 장동민이 고소를 당한 것으로 알려졌다." ]
     
     #Build dataloader
     entity_label_list, inference_data = make_ner_data(file_path=None,
@@ -105,13 +105,13 @@ if __name__ == "__main__":
     parser.add_argument(
         "--model_path",
         type=str,
-        default='/data/bowon_ko/TRoBERTa_BASE/210727/finetune/ner/'
+        default='/data/bowon_ko/TRoBERTa_BASE/220103/finetune/ner/'#210727
     )
     
     parser.add_argument(
         "--tokenizer_path",
         type=str,
-        default="/data/bowon_ko/wordpiece/version_1.9"
+        default="tokenizer/model/wordpiece_mecab/version_1.9"
     )
     
     parser.add_argument(

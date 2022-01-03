@@ -219,37 +219,37 @@ if __name__ == "__main__":
     parser.add_argument(
         "--save_path", 
         type=str, 
-        default='/data/bowon_ko/TRoBERTa_BASE/210727/finetune/ner/'
+        default='/data/bowon_ko/TRoBERTa_BASE/220103/finetune/ner/'
     )
     
     parser.add_argument(
         "--tokenizer_path",
         type=str,
-        default="/data/bowon_ko/wordpiece/version_1.9"
+        default="./tokenizer/model/wordpiece_mecab/version_1.9"
     )
         
     parser.add_argument(
         "--train_file",
         type=str,
-        default="/data/bowon_ko/data/tmax_ner/version0.3/train.tsv"
+        default="jupyter/data/version0.4/train.tsv"
     )
     
     parser.add_argument(
         "--dev_file",
         type=str,
-        default="/data/bowon_ko/data/tmax_ner/version0.3/val.tsv"
+        default="jupyter/data/version0.4/val.tsv"
     )
     
     parser.add_argument(
         "--test_file",
         type=str,
-        default="/data/bowon_ko/data/tmax_ner/version0.3/test.tsv"
+        default="jupyter/data/version0.4/test.tsv"
     )
     
     parser.add_argument(
     "--batch_size",
     type=int,
-    default=32,
+    default=64,
     help="input batch size for train",
     )
     

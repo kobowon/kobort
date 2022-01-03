@@ -1,7 +1,7 @@
 import random
 import logging
 import datetime
-
+import csv
 
 import torch
 import numpy as np
@@ -418,12 +418,13 @@ def make_ner_data(file_path: str, tokenizer: KobortTokenizer, texts = None):
     #tokenization과정을 거치고 이를 space 단위로 결합하여 반환
     dataset_list = []
     if file_path: #학습할 때 혹은 inference할 파일이 있을 때
-        with open(file_path, 'r', encoding='utf-8') as lines:
+        with open(file_path, 'r', encoding='utf-8') as f:
+            lines = csv.reader(f, delimiter='\t')
             for i, line in enumerate(lines):
                 if i > 0:
-                    _, sentence, label_str = line.strip().split('\t')
+                    _, _, tokenized_text_with_unk, label_str = line
                     dataset = {
-                        "sentence" : sentence,
+                        "tokenized_text_with_unk" : tokenized_text_with_unk,
                         "label_str" : label_str
                     }
                     dataset_list.append(dataset)
