@@ -6,7 +6,7 @@ from utils import set_seed, make_ner_data, compute_metrics
 from dataset import NerDataset
 from torch.nn import CrossEntropyLoss
 from transformers import BertTokenizer
-from transformers import RobertaForTokenClassification, AdamW, RobertaConfig
+from transformers import BertForTokenClassification, RobertaForTokenClassification, AdamW, RobertaConfig
 from transformers import get_linear_schedule_with_warmup
 from fastprogress.fastprogress import master_bar, progress_bar
 
@@ -44,12 +44,19 @@ def train(args):
     train_steps = len(train_dataloader) * args.epoch
     
     #Load model
-    model = RobertaForTokenClassification.from_pretrained(
+    # model = RobertaForTokenClassification.from_pretrained(
+    #     args.model_path,
+    #     num_labels=len(entity_label_list),
+    #     id2label = {str(i): label for i,label in enumerate(entity_label_list)},
+    #     label2id = {label: i for i, label in enumerate(entity_label_list)}
+    # )
+    model = BertForTokenClassification.from_pretrained(
         args.model_path,
         num_labels=len(entity_label_list),
         id2label = {str(i): label for i,label in enumerate(entity_label_list)},
         label2id = {label: i for i, label in enumerate(entity_label_list)}
     )
+    
     model = model.cuda()
     optimizer = AdamW(
         model.parameters(),
@@ -209,7 +216,6 @@ def evaluate(args, model, tokenizer, eval_type='dev'): #dev, test
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     
-
     parser.add_argument(
         "--model_path", 
         type=str, 

@@ -4,7 +4,7 @@ import torch
 import numpy as np
 from utils import set_seed, make_ner_data, return_ner_tagged_sentence_plus
 from dataset import NerDataset
-from transformers import RobertaForTokenClassification, BertTokenizer
+from transformers import BertForTokenClassification, RobertaForTokenClassification, BertTokenizer
 
 
 def infer(args):
@@ -40,12 +40,19 @@ def infer(args):
     dataloader = inference_dataset.loader
     
     #Load model
-    model = RobertaForTokenClassification.from_pretrained(
+    # model = RobertaForTokenClassification.from_pretrained(
+    #     args.model_path,
+    #     num_labels=len(entity_label_list),
+    #     id2label = id2label,
+    #     label2id = label2id
+    # )
+    model = BertForTokenClassification.from_pretrained(
         args.model_path,
         num_labels=len(entity_label_list),
         id2label = id2label,
         label2id = label2id
     )
+    
     model = model.cuda()
     
     #run one time only
@@ -117,7 +124,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--max_length",
         type=int,
-        default=128
+        default=512
     )
     
     args = parser.parse_args()
