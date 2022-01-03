@@ -115,9 +115,8 @@ class BioTagging(object):
         return {'text' : n_text, 'entity' : new_entities}
     
         
-    def bio_tagging(self, og_text,
-                    text, tok, entities, 
-                    filt, unk = '<unk>'):
+    def bio_tagging(self, og_text, text, tok, tok_with_unk,
+                    entities, filt, unk = '<unk>'):
         renew_entity = self._data_preprocess(text, entities)
         filt = set(filt)
         filt.add(' ')  
@@ -150,7 +149,8 @@ class BioTagging(object):
         
         return {'original_text': og_text, 
                 'text' : text, 
-                'tokenize' : ' '.join(tok), 
+                'tokenize' : ' '.join(tok),
+                'tokenize_with_unk' : ' '.join(tok_with_unk),
                 'bio_tagging' : ' '.join(bio_tagging)}
 
     
@@ -354,13 +354,13 @@ def BIO_processor():
         # text를 형태소로 분절 및 결합        
         tokens_with_unk, tokens_without_unk, mecab_text = tokenizer.tokenize(og_text)
         tok = tokens_without_unk
-        #tokenized_text_with_unk = tokens_with_unk
+        tokenized_text_with_unk = tokens_with_unk
               
         entity = d['entity_data']
         morph_res = bt.entity_reindexing(og_text, mecab_text, entity)
         
         text, entity = morph_res['text'], morph_res["entity"]
-        res = bt.bio_tagging(og_text, text, tok, 
+        res = bt.bio_tagging(og_text, text, tok, tokenized_text_with_unk, 
                              entity, filters)
         if res:
             count_suitable += 1
@@ -393,9 +393,9 @@ def BIO_processor():
     wd.to_csv('./check.csv', index=False)
     lb = ['ORG','PER','POH','NOH','DAT','LOC','DUR','MNY','PNT','TIM']
     train_df, test_df, val_df = split_data(wd, 0.1, lb, get_val=True)
-    train_df[['original_text', 'tokenize', 'bio_tagging']].to_csv('./jupyter/data/train.tsv', index = False, sep='\t')
-    test_df[['original_text', 'tokenize', 'bio_tagging']].to_csv('./jupyter/data/test.tsv', index = False, sep='\t')
-    val_df[['original_text', 'tokenize', 'bio_tagging']].to_csv('./jupyter/data/val.tsv', index = False, sep='\t')
+    train_df[['original_text', 'tokenize', 'tokenize_with_unk', 'bio_tagging']].to_csv('./jupyter/data/train.tsv', index = False, sep='\t')
+    test_df[['original_text', 'tokenize', 'tokenize_with_unk', 'bio_tagging']].to_csv('./jupyter/data/test.tsv', index = False, sep='\t')
+    val_df[['original_text', 'tokenize', 'tokenize_with_unk', 'bio_tagging']].to_csv('./jupyter/data/val.tsv', index = False, sep='\t')
               
     print("Making BIO Tagging Data is Completed.")
 
