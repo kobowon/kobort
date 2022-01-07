@@ -1,0 +1,1 @@
+epoch 당 step 수 (batch 수) : 12
