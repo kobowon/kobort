@@ -330,7 +330,7 @@ def split_data(df, ratio, labels, get_val=True):
     return data
 
         
-def BIO_processor():
+def BIO_processor(args):
     kmou_ner_parser()
     whole_data = defaultdict(list)
     bt = BioTagging()
@@ -339,12 +339,15 @@ def BIO_processor():
         data = json.load(f)
     rg = len(data['whole_data'])
     
-    #tokenizer = KobortTokenizer("wp-mecab")
-    tokenizer = KobortTokenizer("wp")
+    if args.tokenizer_type == 'wp-mecab':
+        tokenizer = KobortTokenizer("wp-mecab")
+    else:
+        tokenizer = KobortTokenizer("wp")
     
     for k in tqdm(range(rg)):
         d = data['whole_data'][k]
         og_text = d['raw_text'] 
+        entity = d['entity_data']
         # text안에 tokenizer가 사용하는 special token이 포함될 경우 학습데이터에서 제거
         flag = 0
         filters = ['#']
@@ -353,18 +356,20 @@ def BIO_processor():
                 flag = 1
         if flag:
             continue
-        # text를 형태소로 분절 및 결합        
-        #tokens_with_unk, tokens_without_unk, mecab_text = tokenizer.tokenize(og_text)
-        tokens_with_unk, tokens_without_unk = tokenizer.tokenize(og_text)
+        # text를 형태소로 분절 및 결합   
+        
+        if args.tokenizer_type == 'wp-mecab':
+            tokens_with_unk, tokens_without_unk, mecab_text = tokenizer.tokenize(og_text)
+            morph_res = bt.entity_reindexing(og_text, mecab_text, entity)
+            text, entity = morph_res['text'], morph_res["entity"]
+            
+        else:
+            tokens_with_unk, tokens_without_unk = tokenizer.tokenize(og_text)
+            text = og_text
         
         tok = tokens_without_unk
         tokenized_text_with_unk = tokens_with_unk
-              
-        entity = d['entity_data']
-        #morph_res = bt.entity_reindexing(og_text, mecab_text, entity)
-        
-        #text, entity = morph_res['text'], morph_res["entity"]
-        text = tokenized_text_with_unk
+
         
         res = bt.bio_tagging(og_text, text, tok, tokenized_text_with_unk, 
                              entity, filters)
