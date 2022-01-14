@@ -339,7 +339,9 @@ def BIO_processor():
         data = json.load(f)
     rg = len(data['whole_data'])
     
-    tokenizer = KobortTokenizer("wp-mecab")
+    #tokenizer = KobortTokenizer("wp-mecab")
+    tokenizer = KobortTokenizer("wp")
+    
     for k in tqdm(range(rg)):
         d = data['whole_data'][k]
         og_text = d['raw_text'] 
@@ -352,14 +354,18 @@ def BIO_processor():
         if flag:
             continue
         # text를 형태소로 분절 및 결합        
-        tokens_with_unk, tokens_without_unk, mecab_text = tokenizer.tokenize(og_text)
+        #tokens_with_unk, tokens_without_unk, mecab_text = tokenizer.tokenize(og_text)
+        tokens_with_unk, tokens_without_unk = tokenizer.tokenize(og_text)
+        
         tok = tokens_without_unk
         tokenized_text_with_unk = tokens_with_unk
               
         entity = d['entity_data']
-        morph_res = bt.entity_reindexing(og_text, mecab_text, entity)
+        #morph_res = bt.entity_reindexing(og_text, mecab_text, entity)
         
-        text, entity = morph_res['text'], morph_res["entity"]
+        #text, entity = morph_res['text'], morph_res["entity"]
+        text = tokenized_text_with_unk
+        
         res = bt.bio_tagging(og_text, text, tok, tokenized_text_with_unk, 
                              entity, filters)
         if res:

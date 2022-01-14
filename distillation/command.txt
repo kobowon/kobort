@@ -62,23 +62,23 @@ python train.py \
     --alpha_cos 1.0 \
     --alpha_clm 0.0 \
     --mlm \
-    --dump_path /data/bowon_ko/TBERT_Distil/ \
+    --dump_path /data/bowon_ko/TBERT_Distil/220110/ \
     --data_file /data/bowon_ko/data/distil/dump.bert.pickle \
     --token_counts /data/bowon_ko/data/distil/token_counts.bert.pickle \
     --force \
     --student_pretrained_weights /data/bowon_ko/data/distil/distil_kobort.pth \
     --batch_size 16 \
-    --gradient_accumulation_steps 16 \
+    --gradient_accumulation_steps 64 \
     
     
 
 #동작중 2
 export NODE_RANK=0
 export N_NODES=1
-export N_GPU_NODE=5
-export WORLD_SIZE=5
+export N_GPU_NODE=4
+export WORLD_SIZE=4
 export MASTER_ADDR=172.17.0.1
-export MASTER_PORT=23888
+export MASTER_PORT=23893
 python -m torch.distributed.launch \
     --nproc_per_node=$N_GPU_NODE \
     --nnodes=$N_NODES \
@@ -103,7 +103,7 @@ python -m torch.distributed.launch \
     --token_counts /data/bowon_ko/data/distil/token_counts.bert.pickle \
     --force \
     --student_pretrained_weights /data/bowon_ko/data/distil/distil_kobort.pth \
-    --batch_size 32 \
+    --batch_size 8 \
     --gradient_accumulation_steps 16 \
 
 
@@ -183,10 +183,10 @@ python -m torch.distributed.launch \
 
 export NODE_RANK=0
 export N_NODES=1
-export N_GPU_NODE=5
-export WORLD_SIZE=5
+export N_GPU_NODE=2
+export WORLD_SIZE=2
 export MASTER_ADDR=172.17.0.1
-export MASTER_PORT=23891
+export MASTER_PORT=23892
 
 
 python -m torch.distributed.launch \

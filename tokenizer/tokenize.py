@@ -27,7 +27,8 @@ class KobortTokenizer:
             if self.model_name == "wp-mecab":
                 tokenizer_path = wordpiece_mecab_info["vocab_path"]
             elif self.model_name == "wp":
-                tokenizer_path = wordpiece_info["vocab_path"]
+                #tokenizer_path = wordpiece_info["vocab_path"]
+                tokenizer_path = wordpiece_mecab_info["vocab_path"] #vocab이 형태소를 반영한 상태로 더 잘 되어 있을 거라 예상
             self.tokenizer = BertTokenizer.from_pretrained(tokenizer_path, 
                                                   do_lower_case=False,
                                                   unk_token='<unk>',
