@@ -6,9 +6,16 @@ if __name__ == "__main__":
     parser.add_argument(
         "--tokenizer_type", 
         type=str, 
-        default='wp',
+        default='wp-mecab',
         choices = ['wp-mecab', 'wp']
     )
+    
+    parser.add_argument(
+        "--make_file",
+        type=bool,
+        default=False,
+    )
     args = parser.parse_args()
+    print(args)
     BIO(args)
     

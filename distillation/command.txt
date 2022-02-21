@@ -13,7 +13,6 @@ python scripts/token_counts.py \
 내일 multi node로 해보기
 export NODE_RANK=0
 export N_NODES=1
-
 export N_GPU_NODE=4
 export WORLD_SIZE=4
 export MASTER_PORT=22
@@ -32,12 +31,12 @@ python train.py \
     --alpha_cos 1.0 \
     --alpha_clm 0.0 \
     --mlm \
-    --dump_path /data/bowon_ko/TBERT_Distil/ \
+    --dump_path /data/bowon_ko/TBERT_Distil/test/ \
     --data_file /data/bowon_ko/data/distil/test.roberta.pickle \
     --token_counts /data/bowon_ko/data/distil/token_counts.test.pickle \
     --force \
-    --student_pretrained_weights /data/bowon_ko/data/distil/distil_kobort.pth
-
+    --student_pretrained_weights /data/bowon_ko/data/distil/distil_kobort.pth \
+    --batch_size 16
 
 
 
@@ -75,10 +74,10 @@ python train.py \
 #동작중 2
 export NODE_RANK=0
 export N_NODES=1
-export N_GPU_NODE=4
-export WORLD_SIZE=4
+export N_GPU_NODE=2
+export WORLD_SIZE=2
 export MASTER_ADDR=172.17.0.1
-export MASTER_PORT=23893
+export MASTER_PORT=23890
 python -m torch.distributed.launch \
     --nproc_per_node=$N_GPU_NODE \
     --nnodes=$N_NODES \
@@ -103,7 +102,7 @@ python -m torch.distributed.launch \
     --token_counts /data/bowon_ko/data/distil/token_counts.bert.pickle \
     --force \
     --student_pretrained_weights /data/bowon_ko/data/distil/distil_kobort.pth \
-    --batch_size 8 \
+    --batch_size 32 \
     --gradient_accumulation_steps 16 \
 
 
@@ -186,15 +185,11 @@ export N_NODES=1
 export N_GPU_NODE=2
 export WORLD_SIZE=2
 export MASTER_ADDR=172.17.0.1
-export MASTER_PORT=23892
-
-
+export MASTER_PORT=23895
 python -m torch.distributed.launch \
     --nproc_per_node=$N_GPU_NODE \
     --nnodes=$N_NODES \
     --node_rank $NODE_RANK \
-    --master_addr $MASTER_ADDR \
-    --master_port $MASTER_PORT \
     train.py \
     --student_type roberta \
     --n_gpu $WORLD_SIZE \
@@ -214,6 +209,8 @@ python -m torch.distributed.launch \
     --force \
     --student_pretrained_weights /data/bowon_ko/data/distil/distil_kobort.pth \
     --batch_size 4 \
-    --gradient_accumulation_steps 16 \
+    --gradient_accumulation_steps 16
+    
+    \
     
     --fp16 #안 먹히네...

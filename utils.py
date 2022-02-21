@@ -79,7 +79,6 @@ def kmou_ner_parser():
     os.remove(rawdata_dir + "/NER_wholedata.txt")
 
         
-        
 class BioTagging(object):
     def __init__(self, label_path = './jupyter/bio_label_info.info'):
         if label_path and os.path.isfile(label_path):
@@ -394,21 +393,22 @@ def BIO_processor(args):
         labels.append(key)
         whole_data[key] = values
     
-    if not os.path.exists('./jupyter/parsed_data/'):
-        os.makedirs('./jupyter/parsed_data/')
-              
-    with open('./jupyter/parsed_data/bio_label_info.json', 'w') as w:
-        json.dump(bt.bio_label, w)
+    if args.make_file:
+        if not os.path.exists('./jupyter/parsed_data/'):
+            os.makedirs('./jupyter/parsed_data/')
 
-    wd = pd.DataFrame(whole_data)
-    wd.to_csv('./check.csv', index=False)
-    lb = ['ORG','PER','POH','NOH','DAT','LOC','DUR','MNY','PNT','TIM']
-    train_df, test_df, val_df = split_data(wd, 0.1, lb, get_val=True)
-    train_df[['original_text', 'tokenize', 'tokenize_with_unk', 'bio_tagging']].to_csv('./jupyter/data/train.tsv', index = False, sep='\t')
-    test_df[['original_text', 'tokenize', 'tokenize_with_unk', 'bio_tagging']].to_csv('./jupyter/data/test.tsv', index = False, sep='\t')
-    val_df[['original_text', 'tokenize', 'tokenize_with_unk', 'bio_tagging']].to_csv('./jupyter/data/val.tsv', index = False, sep='\t')
-              
-    print("Making BIO Tagging Data is Completed.")
+        with open('./jupyter/parsed_data/bio_label_info.json', 'w') as w:
+            json.dump(bt.bio_label, w)
+
+        wd = pd.DataFrame(whole_data)
+        wd.to_csv('./check.csv', index=False)
+        lb = ['ORG','PER','POH','NOH','DAT','LOC','DUR','MNY','PNT','TIM']
+        train_df, test_df, val_df = split_data(wd, 0.1, lb, get_val=True)
+        train_df[['original_text', 'tokenize', 'tokenize_with_unk', 'bio_tagging']].to_csv('./jupyter/data/train.tsv', index = False, sep='\t')
+        test_df[['original_text', 'tokenize', 'tokenize_with_unk', 'bio_tagging']].to_csv('./jupyter/data/test.tsv', index = False, sep='\t')
+        val_df[['original_text', 'tokenize', 'tokenize_with_unk', 'bio_tagging']].to_csv('./jupyter/data/val.tsv', index = False, sep='\t')
+
+        print("Making BIO Tagging Data is Completed.")
 
 
 #ner 파일을 읽고, 라벨 리스트, 문장, 라벨 반환

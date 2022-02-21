@@ -20,7 +20,7 @@ def infer(args):
                                               cls_token='<s>',
                                               mask_token='<mask>',
                                              )
-    infer_texts = ["지난 14일 방송된 KBS 2TV '불후의 명곡' 왕중왕전에서는 '쇼쇼쇼, 별들의 귀환' 2편이 꾸며졌다.", "장동민 고소, KBS 쿨 FM 하차…조정치 도희 임시 DJ 맡아 최근 여성 비하성 발언으로 논란이 되며 무한도전 ‘식스맨’을 자진 하차한 장동민이 고소를 당한 것으로 알려졌다." ]
+    infer_texts = ["지난 14일 방송된 KBS 2TV '불후의 명곡' 왕중왕전에서는 '쇼쇼쇼, 별들의 귀환' 2편이 꾸며졌다.", "장동민 고소, KBS 쿨 FM 하차…조정치 도희 임시 DJ 맡아 최근 여성 비하성 발언으로 논란이 되며 무한도전 ‘식스맨’을 자진 하차한 장동민이 고소를 당한 것으로 알려졌다.", "보원이는 오늘 양평해장국과 평양냉면을 먹었다 참 맛있었다","평양에 놀러간 보원이는 오늘 양평 해장국과 평양 냉면을 먹었다 참 맛있었다","준호는 오늘 본인의 양평 땅에 놀러가서 양평해장국을 세 그릇 먹었다"]
     
     #Build dataloader
     entity_label_list, inference_data = make_ner_data(file_path=None,
@@ -40,18 +40,18 @@ def infer(args):
     dataloader = inference_dataset.loader
     
     #Load model
-    # model = RobertaForTokenClassification.from_pretrained(
-    #     args.model_path,
-    #     num_labels=len(entity_label_list),
-    #     id2label = id2label,
-    #     label2id = label2id
-    # )
-    model = BertForTokenClassification.from_pretrained(
+    model = RobertaForTokenClassification.from_pretrained(
         args.model_path,
         num_labels=len(entity_label_list),
         id2label = id2label,
         label2id = label2id
     )
+    # model = BertForTokenClassification.from_pretrained(
+    #     args.model_path,
+    #     num_labels=len(entity_label_list),
+    #     id2label = id2label,
+    #     label2id = label2id
+    # )
     
     model = model.cuda()
     
@@ -112,7 +112,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--model_path",
         type=str,
-        default='/data/bowon_ko/TRoBERTa_BASE/220103/finetune/ner/'#210727
+        default='/data/bowon_ko/TBERT_BASE/220103/finetune/ner/'#210727
     )
     
     parser.add_argument(

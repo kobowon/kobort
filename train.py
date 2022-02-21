@@ -10,7 +10,7 @@ from transformers import BertForTokenClassification, RobertaForTokenClassificati
 from transformers import get_linear_schedule_with_warmup
 from fastprogress.fastprogress import master_bar, progress_bar
 
-os.environ["CUDA_VISIBLE_DEVICES"]="1"
+os.environ["CUDA_VISIBLE_DEVICES"]="0,1,2,3"
 
 def train(args):
     #Set GPU
@@ -44,18 +44,18 @@ def train(args):
     train_steps = len(train_dataloader) * args.epoch
     
     #Load model
-    # model = RobertaForTokenClassification.from_pretrained(
-    #     args.model_path,
-    #     num_labels=len(entity_label_list),
-    #     id2label = {str(i): label for i,label in enumerate(entity_label_list)},
-    #     label2id = {label: i for i, label in enumerate(entity_label_list)}
-    # )
-    model = BertForTokenClassification.from_pretrained(
+    model = RobertaForTokenClassification.from_pretrained(
         args.model_path,
         num_labels=len(entity_label_list),
         id2label = {str(i): label for i,label in enumerate(entity_label_list)},
         label2id = {label: i for i, label in enumerate(entity_label_list)}
     )
+    # model = BertForTokenClassification.from_pretrained(
+    #     args.model_path,
+    #     num_labels=len(entity_label_list),
+    #     id2label = {str(i): label for i,label in enumerate(entity_label_list)},
+    #     label2id = {label: i for i, label in enumerate(entity_label_list)}
+    # )
     
     model = model.cuda()
     optimizer = AdamW(
@@ -237,19 +237,19 @@ if __name__ == "__main__":
     parser.add_argument(
         "--train_file",
         type=str,
-        default="jupyter/data/version0.4/train.tsv"
+        default="jupyter/data/train.tsv"
     )
     
     parser.add_argument(
         "--dev_file",
         type=str,
-        default="jupyter/data/version0.4/val.tsv"
+        default="jupyter/data/val.tsv"
     )
     
     parser.add_argument(
         "--test_file",
         type=str,
-        default="jupyter/data/version0.4/test.tsv"
+        default="jupyter/data/test.tsv"
     )
     
     parser.add_argument(

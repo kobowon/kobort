@@ -1,0 +1,7 @@
+python data_processing.py \
+    --tokenizer_type wp-mecab \
+    --make_file True
+    
+python train.py \
+    --batch_size 16 \
+    --max_length 512

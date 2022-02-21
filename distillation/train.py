@@ -43,7 +43,7 @@ from transformers import (
 )
 from utils import init_gpu_params, logger, set_seed #git_log, 
 
-os.environ["CUDA_VISIBLE_DEVICES"]="7"
+os.environ["CUDA_VISIBLE_DEVICES"]="0,1"
 
 MODEL_CLASSES = {
     "distilbert": (DistilBertConfig, DistilBertForMaskedLM, DistilBertTokenizer),

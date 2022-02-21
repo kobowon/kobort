@@ -1,1 +1,1 @@
-epoch 당 step 수 (batch 수) : 14678588
+epoch 당 step 수 (batch 수) : 3669647
