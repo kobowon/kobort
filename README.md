@@ -1,10 +1,12 @@
-토크나이저 사용 예제
+<h2>사용법</h2>
+
+<h3>토크나이저 사용 예제</h3>
 ```
 from tokenizer import KobortTokenizer
 tokenizer = KobortTokenizer("wp-mecab")
 tokenizer.tokenize("보원이는 밥을 먹었다")
 ```
-#NER 파인튜닝 예제
+<h3>NER 파인튜닝 예제</h3>
 
 1.데이터 생성 작업
 ```
