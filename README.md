@@ -1,6 +1,7 @@
 <h2>사용법</h2>
 
 <h3>토크나이저 사용 예제</h3>
+
 ```
 from tokenizer import KobortTokenizer
 tokenizer = KobortTokenizer("wp-mecab")
