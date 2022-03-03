@@ -1,0 +1,11 @@
+현재 
+2.1 : 50000
+2.2 : 32000
+2.3 : 22000
+2.4 : 27000
+
+python train_wordpiece.py \
+  --data_path /data/bowon_ko/data/crawling/Dataset_fin/preprocess_complete2/josa/train_tok_2.1.txt \
+  --tokenizer_type wp \
+  --vocab_dir /home/ubuntu/bowon_ko/kobort/tokenizer/model/wordpiece/version_2.4/ \
+  --vocab_size 27000

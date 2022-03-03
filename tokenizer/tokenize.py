@@ -1,7 +1,7 @@
 from transformers import BertTokenizer,AlbertTokenizer
 from konlpy.tag import Mecab
 
-wordpiece_info = {"vocab_path" : "tokenizer/model/wordpiece/version_1.4"}#1.4
+wordpiece_info = {"vocab_path" : "tokenizer/model/wordpiece/version_2.4.1"}#1.4
 
 wordpiece_mecab_info = {"vocab_path" : "tokenizer/model/wordpiece_mecab/version_1.9"}
 

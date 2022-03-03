@@ -1,7 +1,24 @@
 python data_processing.py \
     --tokenizer_type wp-mecab \
     --make_file True
+
+#바뀐 토크나이저로 unsuitable data 확인
+python data_processing.py \
+    --tokenizer_type wp
+
+python train.py \
+    --model_path /data/bowon_ko/TRoBERTa_BASE/210727/pretrain/checkpoint-2000000/ \
+    --batch_size 32 \
+    --max_length 512
     
 python train.py \
-    --batch_size 16 \
+    --model_path /data/bowon_ko/TRoBERTa_BASE/211129/pretrain/checkpoint-2000000 \
+    --batch_size 32 \
+    --max_length 512
+
+
+
+python train_distil.py \
+    --model_path /data/bowon_ko/TBERT_Distil/220110 \
+    --batch_size 32 \
     --max_length 512

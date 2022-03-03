@@ -10,7 +10,7 @@ from transformers import BertForTokenClassification, RobertaForTokenClassificati
 from transformers import get_linear_schedule_with_warmup
 from fastprogress.fastprogress import master_bar, progress_bar
 
-os.environ["CUDA_VISIBLE_DEVICES"]="1"
+os.environ["CUDA_VISIBLE_DEVICES"]="5"
 
 def train(args):
     #Set GPU
@@ -219,13 +219,13 @@ if __name__ == "__main__":
     parser.add_argument(
         "--model_path", 
         type=str, 
-        default='/data/bowon_ko/TRoBERTa_BASE/210727/pretrain/checkpoint-2000000/'
+        default='/data/bowon_ko/TBERT_Distil/220110/model_epoch_2.pth'
     )
     
     parser.add_argument(
         "--save_path", 
         type=str, 
-        default='/data/bowon_ko/TRoBERTa_BASE/220103/finetune/ner/'
+        default='/data/bowon_ko/TBERT_Distil/220110/finetune/ner/'
     )
     
     parser.add_argument(
