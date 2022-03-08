@@ -20,7 +20,7 @@ import sys
 from konlpy.tag import Mecab
 import pandas as pd
 import random
-
+import os
 
 
 logger = logging.getLogger(__name__)
@@ -48,8 +48,8 @@ def index_parser(raw_text, tagged_text):
     data["entity_data"] = entity_data_list
     return data
 
-def kmou_ner_parser():
-    rawdata_dir = "./jupyter/rawdata/KMOU-NER-DATA/"
+def kmou_ner_parser(args):
+    rawdata_dir = args.rawdata_dir
     dir_list = os.listdir(rawdata_dir)
     dir_list.sort()
     with open(rawdata_dir + "/NER_wholedata.txt", "w") as w:
@@ -72,8 +72,11 @@ def kmou_ner_parser():
         whole_data["whole_data"] = []
         for line in lines:
             whole_data["whole_data"].append((index_parser(line.split("\t")[0], line.split("\t")[1])))
-
-    with open("./jupyter/parsed_data/NER_wholedata_parsed.json", "w") as json_file:
+    
+    if os.path.isdir("./data/parsed_data"):
+        os.mkdir("./data/parsed_data")
+    
+    with open(args.parsed_rawdata_path, "w") as json_file:
         json.dump(whole_data, json_file)
 
     os.remove(rawdata_dir + "/NER_wholedata.txt")

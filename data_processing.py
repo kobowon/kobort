@@ -29,5 +29,8 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
     print(args)
+    
+    kmou_ner_parser(data_dir=args.data_dir)
+    
     BIO(args)
     
