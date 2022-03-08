@@ -78,19 +78,20 @@ def kmou_ner_parser():
 
     os.remove(rawdata_dir + "/NER_wholedata.txt")
 
-        
 class BioTagging(object):
-    def __init__(self, label_path = './jupyter/bio_label_info.info'):
+    def __init__(self, label_path = None):
         if label_path and os.path.isfile(label_path):
             with open(label_path,"r") as f:
                 self.bio_label = json.load(f) 
         else:
             self.bio_label = dict()
+            self.bio_label['O'] = 0
             self.bio_cnt = 1
         
         self.label_cnt = defaultdict(lambda : defaultdict(int))
         self.label_type = defaultdict(list)
         self.data_idx = 0
+        
         
     def entity_reindexing(self, text, n_text, entity):
         start, cnt, new_entities = 0, 0, []
@@ -100,6 +101,7 @@ class BioTagging(object):
                 ent['text'], ent['start'] = ent['text'].lstrip(), ent['start'] + 1
             if ent['text'][-1] == ' ':
                 ent['text'], ent['end'] = ent['text'].rstrip(), ent['end'] - 1
+
 
             for i in range(start, len(text)):
                 while text[i] != n_text[i + cnt]:
@@ -114,22 +116,28 @@ class BioTagging(object):
         return {'text' : n_text, 'entity' : new_entities}
     
         
-    def bio_tagging(self, og_text, text, tok, tok_with_unk,
-                    entities, filt, unk = '<unk>'):
+    def bio_tagging(self, text, tok, entities, 
+                    tok_encode, filt, unk):
+        
         renew_entity = self._data_preprocess(text, entities)
         filt = set(filt)
-        filt.add(' ')  
+        filt.add(' ')
         
-        #bio_tagging, cnt = [0 for i in range(len(tok))], 0
-        bio_tagging, cnt = ['O' for i in range(len(tok))], 0     
+        bio_tagging, cnt = [0 for i in range(len(tok))], 0
+        #bio_tagging, cnt = ['O' for i in range(len(tok))], 0
+        
         tok_idxs, tmp = [0, 0], []
+
         while renew_entity:
-            entity, bio_idxs = renew_entity.pop(0), defaultdict(int)          
+            entity, bio_idxs = renew_entity.pop(0), defaultdict(int)
+            
             if 'B-' + entity['category'] not in self.bio_label:
                 self._labeling(entity['category'])        
+
             tok_idxs, cnt = self._tagging_single_entity(tok_idxs, tok, entity, 
                                                         bio_idxs, cnt, filt, unk, 
-                                                        text.replace(' ', '') )           
+                                                        text.replace(' ', '') )
+            
             if cnt == 'Delete':
                 return 0
             
@@ -137,50 +145,55 @@ class BioTagging(object):
                 if len(tok[key]) != value:
                     return 0
                 if not check:
-                    tmp.append(entity['category'])       
-                #bio_tagging[key] = self.bio_label['I-'+entity['category']] if check else self.bio_label['B-'+entity['category']]       
-                bio_tagging[key] = 'I-'+entity['category'] if check else 'B-'+entity['category']
+                    tmp.append(entity['category'])
+                
+                bio_tagging[key] = self.bio_label['I-'+entity['category']] if check else self.bio_label['B-'+entity['category']]
+                #bio_tagging[key] = 'I-'+entity['category'] if check else 'B-'+entity['category']
                 
         for lt in tmp:
             self.label_cnt[self.data_idx][lt] += 1
             self.label_type[lt]
         self.data_idx += 1
-        
-        return {'original_text': og_text, 
-                'text' : text, 
-                'tokenize' : ' '.join(tok),
-                'tokenize_with_unk' : ' '.join(tok_with_unk),
-                'bio_tagging' : ' '.join(bio_tagging)}
 
+        return {'text' : text, 'tokenize' : tok, 
+                'bio_tagging' : bio_tagging, 'tok_encode' : tok_encode}
+    
     
     def _tagging_single_entity(self, tok_idxs, tok, 
                                entity, bio_idxs, cnt, 
-                               filt, unk, text):  
+                               filt, unk, text):
+        
         for ti in range(tok_idxs[0], len(tok)):
             if ti < tok_idxs[0]:
                 continue
+
             if tok[ti] == unk:
                 res = self._unk_preprocess(tok[ti:], text[cnt:], 
                                            filt, unk, ti)
-                cnt += res[0]            
+                cnt += res[0]
+                
                 if cnt > entity['end'] or (cnt-res[0] < entity['start'] and cnt >= entity['start']):
-                    return None, 'Delete'             
+                    return None, 'Delete'
+               
                 elif cnt >= entity['start'] and cnt <= entity['end']:
                     for unk_idx in range(ti, res[1]+1):
                         bio_idxs[unk_idx] += len(unk)
                     if cnt == entity['end']:
-                        return [res[1]+1, 0], cnt + 1                              
+                        return [res[1]+1, 0], cnt + 1            
+                    
                 cnt += 1
                 tok_idxs = [res[1] + 1, 0]
-                continue    
-                
+                continue
+                                     
             for ci in range(tok_idxs[1], len(tok[ti])):
                 if cnt >= entity['start'] and cnt <= entity['end']:
                     bio_idxs[ti] += 1
+
                     if tok[ti][ci] in filt:
                         continue
                     if cnt == entity['end']:
                         return [ti, ci], cnt
+
                 elif tok[ti][ci] in filt:
                     continue
                 cnt += 1
@@ -188,10 +201,13 @@ class BioTagging(object):
                 
     def _unk_preprocess(self, remaining_tok, 
                         remaining_text, 
-                        filts, unk, ti):       
+                        filts, unk, ti):
+        
         if len(remaining_tok) == 1:
             return len(remaining_text) - 1, ti
+
         nxt_none_unk, cnt = remaining_tok[1], 0
+
         if nxt_none_unk == unk:
             res = self._unk_preprocess(remaining_tok[1:], 
                                        remaining_text, 
@@ -301,14 +317,14 @@ class RestoreOutput(object):
                     break
         return cnt        
     
+
 def split_data(df, ratio, labels, get_val=True):
     data_idxs = [i for i in range(len(df))]
-    SEED = 7
-    random.Random(SEED).shuffle(data_idxs)
+    random.Random(7).shuffle(data_idxs)
     tcnt = 2 if get_val else 1
     data = []
     while tcnt > 0:
-        cur_data_type = 'Test Data' if tcnt == 1 else 'Validation Data'
+        cur_data_type = 'test' if tcnt == 1 else 'validation'
         test_cnt = df[labels].sum().apply(lambda x: int(x * ratio))
         test_check = np.array(list(test_cnt.values))
         cur_test_idxs = set()
@@ -322,93 +338,108 @@ def split_data(df, ratio, labels, get_val=True):
                     print(f"# of Addtional {cur_data_type} From {labels[i]} == {abs(test_check[i])}")
                 if get_val:
                     print('-' * 100)
-                data.insert(0, df.iloc[list(cur_test_idxs)])
+                data.insert(0, [cur_data_type, df.iloc[list(cur_test_idxs)]])
                 break
         tcnt -= 1
-    data.insert(0, df.iloc[data_idxs])
+    data.insert(0, ['train', df.iloc[data_idxs]])
     return data
 
-        
-def BIO_processor(args):
-    kmou_ner_parser()
+
+def DATA_processor(args):
+    tokenizer = KobortTokenizer(model_name=args.tokenizer_type)
     whole_data = defaultdict(list)
-    bt = BioTagging()
+    unsuit_data = defaultdict(list)
+    bt = BioTagging(label_path=args.label_info_path)
     count_unsuitable, count_suitable = 0, 0
-    with open('./jupyter/parsed_data/NER_wholedata_parsed.json', 'r') as f:
+    
+    with open(args.parsed_rawdata_path, 'r') as f:
         data = json.load(f)
+    
     rg = len(data['whole_data'])
-    
-    if args.tokenizer_type == 'wp-mecab':
-        tokenizer = KobortTokenizer("wp-mecab")
-    else:
-        tokenizer = KobortTokenizer("wp")
-    
     for k in tqdm(range(rg)):
         d = data['whole_data'][k]
-        og_text = d['raw_text'] 
+        text = d['raw_text']
         entity = d['entity_data']
+        entity_analysis_purpose = entity[:]
+        
+        if k in [1420, 548]: # 데이터 자체에서 오류 발견
+            continue
+            
         # text안에 tokenizer가 사용하는 special token이 포함될 경우 학습데이터에서 제거
-        flag = 0
-        filters = ['#']
-        for filt in filters:
-            if filt in og_text:
+        flag =0
+        for filt in args.filters:
+            if filt in text:
                 flag = 1
         if flag:
             continue
-        # text를 형태소로 분절 및 결합   
         
-        if args.tokenizer_type == 'wp-mecab':
-            tokens_with_unk, tokens_without_unk, mecab_text = tokenizer.tokenize(og_text)
-            morph_res = bt.entity_reindexing(og_text, mecab_text, entity)
-            text, entity = morph_res['text'], morph_res["entity"]
-            
+        # text를 형태소로 분절 및 결합
+        if 'mecab' in args.tokenizer_type:
+            tok_with_unk, tok_without_unk, morphs_text = tokenizer.tokenize(text)
+            morph_res = bt.entity_reindexing(text, morphs_text, entity)
+            text, entity = morph_res['text'], morph_res['entity']
         else:
-            tokens_with_unk, tokens_without_unk = tokenizer.tokenize(og_text)
-            text = og_text
+            tok_with_unk, tok_without_unk = tokenizer.tokenize(text)
         
-        tok = tokens_without_unk
-        tokenized_text_with_unk = tokens_with_unk
+        tok_encode = tokenizer.encode(text)
+        
+        assert len(tok_without_unk) + 2 == len(tok_encode)
+        if len(tok_without_unk) + 2 == len(tok_encode) and len(tok_encode) < 512:
+            res = bt.bio_tagging(text, tok_without_unk, 
+                                 entity, tok_encode, 
+                                 args.filters,
+                                 args.unknown_token)
+            if res:
+                count_suitable += 1
+                for key, value in res.items():
+                    if key == 'bio_tagging':
+                        value = [0] + value + [0]
+                    whole_data[key].append(value)
+            else:
+                unsuit_data['text'].append(text)
+                unsuit_data['tokenize'].append(tok_without_unk)
+                unsuit_data['entities'].append([entities['text'] for entities in entity_analysis_purpose])
+                count_unsuitable += 1
 
-        
-        res = bt.bio_tagging(og_text, text, tok, tokenized_text_with_unk, 
-                             entity, filters)
-        if res:
-            count_suitable += 1
-            for key, value in res.items():
-                whole_data[key].append(value)
-              
         else:
             count_unsuitable += 1
-
+    
+    unsuit_data = pd.DataFrame(unsuit_data)
+    unsuit_data.to_csv('unsuit_data.csv', index = False)
+    
     print("unsuitable_data count : {}".format(count_unsuitable))
     print("suitable_data count : {}".format(count_suitable))
-
+    
     for label_type in bt.label_type:
         bt.label_type[label_type] = [0 for _ in range(count_suitable)]
+
     for k, v in bt.label_cnt.items():
         for key, value in v.items():
             bt.label_type[key][k] = value
+
     labels = []
     for key, values in bt.label_type.items():
         labels.append(key)
         whole_data[key] = values
+
+    if not os.path.exists(args.data_dir + '/parsed_data/'):
+        os.makedirs(args.data_dir + '/parsed_data/')
+
+    with open(args.data_dir +'/parsed_data/bio_label_info.json', 'w') as w:
+        json.dump(bt.bio_label, w)
+
+        
+    whole_data = pd.DataFrame(whole_data)
+    datas = split_data(whole_data, args.split_ratio, labels, get_val = False)
     
-    if args.make_file:
-        if not os.path.exists('./jupyter/parsed_data/'):
-            os.makedirs('./jupyter/parsed_data/')
+    
+    for data_purpose, df in datas:
+        for feature, p in [['tok_encode','sentence'], ['bio_tagging','label']]:
+            torch.save(list(df[feature].values), args.data_dir + f'/gee_{p}_dataset_{data_purpose}.pt')
+            
+    print("Data Preprocessing Completed.")  
 
-        with open('./jupyter/parsed_data/bio_label_info.json', 'w') as w:
-            json.dump(bt.bio_label, w)
 
-        wd = pd.DataFrame(whole_data)
-        wd.to_csv('./check.csv', index=False)
-        lb = ['ORG','PER','POH','NOH','DAT','LOC','DUR','MNY','PNT','TIM']
-        train_df, test_df, val_df = split_data(wd, 0.1, lb, get_val=True)
-        train_df[['original_text', 'tokenize', 'tokenize_with_unk', 'bio_tagging']].to_csv('./jupyter/data/train.tsv', index = False, sep='\t')
-        test_df[['original_text', 'tokenize', 'tokenize_with_unk', 'bio_tagging']].to_csv('./jupyter/data/test.tsv', index = False, sep='\t')
-        val_df[['original_text', 'tokenize', 'tokenize_with_unk', 'bio_tagging']].to_csv('./jupyter/data/val.tsv', index = False, sep='\t')
-
-        print("Making BIO Tagging Data is Completed.")
 
 
 #ner 파일을 읽고, 라벨 리스트, 문장, 라벨 반환
