@@ -10,6 +10,8 @@ from transformers import BertForTokenClassification, RobertaForTokenClassificati
 from transformers import get_linear_schedule_with_warmup
 from fastprogress.fastprogress import master_bar, progress_bar
 
+from tokenizer import KobortTokenizer
+
 os.environ["CUDA_VISIBLE_DEVICES"]="5"
 
 def train(args):
@@ -17,16 +19,11 @@ def train(args):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     
     #Load tokenizer
-    tokenizer = BertTokenizer.from_pretrained(args.tokenizer_path, 
-                          do_lower_case=False,
-                          unk_token='<unk>',
-                          sep_token='</s>',
-                          pad_token='<pad>',
-                          cls_token='<s>',
-                          mask_token='<mask>',
-                         )
+    tokenizer = KobortTokenizer("wp-mecab").tokenizer
+    
     #Build dataloader
     entity_label_list, train_data = make_ner_data(args.train_file, tokenizer)
+    print(entity_label_list)
     #sampelr 처리 못함
     kwargs = (
         {"num_workers":torch.cuda.device_count(), "pin_memory":True} if torch.cuda.is_available()
@@ -40,9 +37,10 @@ def train(args):
                          shuffle=False,
                          **kwargs
                         )
+
     train_dataloader = train_dataset.loader
     train_steps = len(train_dataloader) * args.epoch
-    
+
     #Load model
     model = RobertaForTokenClassification.from_pretrained(
         args.model_path,
@@ -50,6 +48,7 @@ def train(args):
         id2label = {str(i): label for i,label in enumerate(entity_label_list)},
         label2id = {label: i for i, label in enumerate(entity_label_list)}
     )
+    
     # model = BertForTokenClassification.from_pretrained(
     #     args.model_path,
     #     num_labels=len(entity_label_list),
@@ -216,80 +215,21 @@ def evaluate(args, model, tokenizer, eval_type='dev'): #dev, test
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     
-    parser.add_argument(
-        "--model_path", 
-        type=str, 
-        default='/data/bowon_ko/TBERT_Distil/220110/model_epoch_2.pth'
-    )
-    
-    parser.add_argument(
-        "--save_path", 
-        type=str, 
-        default='/data/bowon_ko/TBERT_Distil/220110/finetune/ner/'
-    )
-    
-    parser.add_argument(
-        "--tokenizer_path",
-        type=str,
-        default="./tokenizer/model/wordpiece_mecab/version_1.9"
-    )
-        
-    parser.add_argument(
-        "--train_file",
-        type=str,
-        default="jupyter/data/train.tsv"
-    )
-    
-    parser.add_argument(
-        "--dev_file",
-        type=str,
-        default="jupyter/data/val.tsv"
-    )
-    
-    parser.add_argument(
-        "--test_file",
-        type=str,
-        default="jupyter/data/test.tsv"
-    )
-    
-    parser.add_argument(
-    "--batch_size",
-    type=int,
-    default=64,
-    help="input batch size for train",
-    )
-    
-    parser.add_argument(
-        "--max_length",
-        type=int,
-        default=128
-    )
-    
-    parser.add_argument(
-        "--lr",
-        type=float,
-        default=5e-5
-    )
-    
-    parser.add_argument(
-        "--epoch",
-        type=int,
-        default=10
-    )
-    
-    parser.add_argument(
-        "--warmup_ratio",
-        type=float,
-        default=0.06
-    )
-    
-    parser.add_argument(
-        "--seed",
-        type=int,
-        default=42
-    )
+    parser.add_argument("--model_path", type=str, default='/data/bowon_ko/TBERT_Distil/220110/model_epoch_2.pth') 
+    parser.add_argument("--save_path", type=str, default='/data/bowon_ko/TBERT_Distil/220110/finetune/ner/') 
+    parser.add_argument("--tokenizer_path",type=str,default="/home/ubuntu/bowon_ko/kobort/tokenizer/model/wordpiece_mecab/version_1.9")
+    parser.add_argument("--train_file",type=str,default="jupyter/data/train.tsv")
+    parser.add_argument("--dev_file",type=str,default="jupyter/data/val.tsv")
+    parser.add_argument("--test_file",type=str,default="jupyter/data/test.tsv")
+    parser.add_argument("--batch_size",type=int,default=64,help="input batch size for train")
+    parser.add_argument("--max_length",type=int,default=128)
+    parser.add_argument("--lr",type=float,default=5e-5)
+    parser.add_argument("--epoch",type=int,default=3)
+    parser.add_argument("--warmup_ratio",type=float,default=0.06)
+    parser.add_argument("--seed",type=int,default=42)
     
     args = parser.parse_args()
+    
     set_seed(args)
     train(args)
     

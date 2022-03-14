@@ -10,6 +10,7 @@ from sklearn import metrics as sklearn_metrics
 
 import transformers
 from tokenizer import KobortTokenizer
+from transformers import PreTrainedTokenizer
 import os
 import re
 import json
@@ -412,7 +413,7 @@ def BIO_processor(args):
 
 
 #ner 파일을 읽고, 라벨 리스트, 문장, 라벨 반환
-def make_ner_data(file_path: str, tokenizer: KobortTokenizer, texts = None):
+def make_ner_data(file_path: str, tokenizer: PreTrainedTokenizer, texts = None):
     #label_list 작성
     entity_label_list = ['O', 
          'B-DUR', 'I-DUR', 

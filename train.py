@@ -17,14 +17,8 @@ def train(args):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     
     #Load tokenizer
-    tokenizer = BertTokenizer.from_pretrained(args.tokenizer_path, 
-                          do_lower_case=False,
-                          unk_token='<unk>',
-                          sep_token='</s>',
-                          pad_token='<pad>',
-                          cls_token='<s>',
-                          mask_token='<mask>',
-                         )
+    tokenizer = KobortTokenizer("wp-mecab").tokenizer
+    
     #Build dataloader
     entity_label_list, train_data = make_ner_data(args.train_file, tokenizer)
     #sampelr 처리 못함
