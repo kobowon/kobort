@@ -1,7 +1,7 @@
 import random
 import logging
 import datetime
-import csv
+
 
 import torch
 import numpy as np
@@ -10,7 +10,6 @@ from sklearn import metrics as sklearn_metrics
 
 import transformers
 from tokenizer import KobortTokenizer
-from transformers import PreTrainedTokenizer
 import os
 import re
 import json
@@ -21,7 +20,7 @@ import sys
 from konlpy.tag import Mecab
 import pandas as pd
 import random
-import os
+
 
 
 logger = logging.getLogger(__name__)
@@ -49,8 +48,8 @@ def index_parser(raw_text, tagged_text):
     data["entity_data"] = entity_data_list
     return data
 
-def kmou_ner_parser(args):
-    rawdata_dir = args.rawdata_dir
+def kmou_ner_parser():
+    rawdata_dir = "./jupyter/rawdata/KMOU-NER-DATA/"
     dir_list = os.listdir(rawdata_dir)
     dir_list.sort()
     with open(rawdata_dir + "/NER_wholedata.txt", "w") as w:
@@ -73,15 +72,14 @@ def kmou_ner_parser(args):
         whole_data["whole_data"] = []
         for line in lines:
             whole_data["whole_data"].append((index_parser(line.split("\t")[0], line.split("\t")[1])))
-    
-    if os.path.isdir("./data/parsed_data"):
-        os.mkdir("./data/parsed_data")
-    
-    with open(args.parsed_rawdata_path, "w") as json_file:
+
+    with open("./jupyter/parsed_data/NER_wholedata_parsed.json", "w") as json_file:
         json.dump(whole_data, json_file)
 
     os.remove(rawdata_dir + "/NER_wholedata.txt")
 
+        
+        
 class BioTagging(object):
     def __init__(self, label_path = None):
         if label_path and os.path.isfile(label_path):
@@ -127,8 +125,8 @@ class BioTagging(object):
         filt = set(filt)
         filt.add(' ')
         
-        bio_tagging, cnt = [0 for i in range(len(tok))], 0
-        #bio_tagging, cnt = ['O' for i in range(len(tok))], 0
+        #bio_tagging, cnt = [0 for i in range(len(tok))], 0
+        bio_tagging, cnt = ['O' for i in range(len(tok))], 0
         
         tok_idxs, tmp = [0, 0], []
 
@@ -151,8 +149,8 @@ class BioTagging(object):
                 if not check:
                     tmp.append(entity['category'])
                 
-                bio_tagging[key] = self.bio_label['I-'+entity['category']] if check else self.bio_label['B-'+entity['category']]
-                #bio_tagging[key] = 'I-'+entity['category'] if check else 'B-'+entity['category']
+                #bio_tagging[key] = self.bio_label['I-'+entity['category']] if check else self.bio_label['B-'+entity['category']]
+                bio_tagging[key] = 'I-'+entity['category'] if check else 'B-'+entity['category']
                 
         for lt in tmp:
             self.label_cnt[self.data_idx][lt] += 1
@@ -250,6 +248,7 @@ class BioTagging(object):
         self.bio_label['I-' + category] = self.bio_cnt+1
         self.bio_cnt += 2
 
+
     
     
     
@@ -321,7 +320,6 @@ class RestoreOutput(object):
                     break
         return cnt        
     
-
 def split_data(df, ratio, labels, get_val=True):
     data_idxs = [i for i in range(len(df))]
     random.Random(7).shuffle(data_idxs)
@@ -349,14 +347,15 @@ def split_data(df, ratio, labels, get_val=True):
     return data
 
 
+
 def DATA_processor(args):
-    tokenizer = KobortTokenizer(model_name=args.tokenizer_type)
+    tokenizer = KobortTokenizer(model_name=args.tokenizer_model_name)
     whole_data = defaultdict(list)
     unsuit_data = defaultdict(list)
     bt = BioTagging(label_path=args.label_info_path)
     count_unsuitable, count_suitable = 0, 0
     
-    with open(args.parsed_rawdata_path, 'r') as f:
+    with open('./jupyter/parsed_data/NER_wholedata_parsed.json', 'r') as f:
         data = json.load(f)
     
     rg = len(data['whole_data'])
@@ -366,9 +365,6 @@ def DATA_processor(args):
         entity = d['entity_data']
         entity_analysis_purpose = entity[:]
         
-        if k in [1420, 548]: # 데이터 자체에서 오류 발견
-            continue
-            
         # text안에 tokenizer가 사용하는 special token이 포함될 경우 학습데이터에서 제거
         flag =0
         for filt in args.filters:
@@ -378,14 +374,15 @@ def DATA_processor(args):
             continue
         
         # text를 형태소로 분절 및 결합
-        if 'mecab' in args.tokenizer_type:
+        if 'mecab' in args.tokenizer_model_name:
             tok_with_unk, tok_without_unk, morphs_text = tokenizer.tokenize(text)
             morph_res = bt.entity_reindexing(text, morphs_text, entity)
             text, entity = morph_res['text'], morph_res['entity']
         else:
             tok_with_unk, tok_without_unk = tokenizer.tokenize(text)
         
-        tok_encode = tokenizer.encode(text)
+        tok_encode = tokenizer.tokenizer.encode(text)
+        
         
         assert len(tok_without_unk) + 2 == len(tok_encode)
         if len(tok_without_unk) + 2 == len(tok_encode) and len(tok_encode) < 512:
@@ -396,8 +393,8 @@ def DATA_processor(args):
             if res:
                 count_suitable += 1
                 for key, value in res.items():
-                    if key == 'bio_tagging':
-                        value = [0] + value + [0]
+                    if key == 'bio_tagging' or key == 'tokenize':
+                        value = ' '.join(value)
                     whole_data[key].append(value)
             else:
                 unsuit_data['text'].append(text)
@@ -408,8 +405,8 @@ def DATA_processor(args):
         else:
             count_unsuitable += 1
     
-    unsuit_data = pd.DataFrame(unsuit_data)
-    unsuit_data.to_csv('unsuit_data.csv', index = False)
+    #unsuit_data = pd.DataFrame(unsuit_data)
+    #unsuit_data.to_csv('unsuit_data.csv', index = False)
     
     print("unsuitable_data count : {}".format(count_unsuitable))
     print("suitable_data count : {}".format(count_suitable))
@@ -426,28 +423,31 @@ def DATA_processor(args):
         labels.append(key)
         whole_data[key] = values
 
-    if not os.path.exists(args.data_dir + '/parsed_data/'):
-        os.makedirs(args.data_dir + '/parsed_data/')
-
-    with open(args.data_dir +'/parsed_data/bio_label_info.json', 'w') as w:
+    if not os.path.exists('./jupyter/parsed_data/'):
+        os.makedirs('./jupyter/parsed_data/')
+              
+    with open('./jupyter/parsed_data/bio_label_info.json', 'w') as w:
         json.dump(bt.bio_label, w)
-
         
-    whole_data = pd.DataFrame(whole_data)
-    datas = split_data(whole_data, args.split_ratio, labels, get_val = False)
+    wd = pd.DataFrame(whole_data)
+    wd.to_csv('./check.csv', index=False)
+    
+    datas = split_data(wd, args.split_ratio, labels, get_val = args.get_val)
     
     
     for data_purpose, df in datas:
-        for feature, p in [['tok_encode','sentence'], ['bio_tagging','label']]:
-            torch.save(list(df[feature].values), args.data_dir + f'/gee_{p}_dataset_{data_purpose}.pt')
+        if args.save_data_type == 'pt':
+            for feature, p in [['tok_encode','sentence'], ['bio_tagging','label']]:
+                torch.save(list(df[feature].values), f'./jupyter/data/gee_{p}_dataset_{data_purpose}.pt')
+        
+        elif args.save_data_type == 'tsv':
+            df[['text', 'tokenize', 'bio_tagging']].to_csv(f'./jupyter/data/wp-mecab_{data_purpose}.tsv', index=False, sep='\t')
             
     print("Data Preprocessing Completed.")  
 
 
-
-
 #ner 파일을 읽고, 라벨 리스트, 문장, 라벨 반환
-def make_ner_data(file_path: str, tokenizer: PreTrainedTokenizer, texts = None):
+def make_ner_data(args, file_path: str, tokenizer: KobortTokenizer, texts = None):
     #label_list 작성
     entity_label_list = ['O', 
          'B-DUR', 'I-DUR', 
@@ -464,25 +464,23 @@ def make_ner_data(file_path: str, tokenizer: PreTrainedTokenizer, texts = None):
     #tokenization과정을 거치고 이를 space 단위로 결합하여 반환
     dataset_list = []
     if file_path: #학습할 때 혹은 inference할 파일이 있을 때
-        with open(file_path, 'r', encoding='utf-8') as f:
-            lines = csv.reader(f, delimiter='\t')
+        with open(file_path, 'r', encoding='utf-8') as lines:
             for i, line in enumerate(lines):
                 if i > 0:
-                    _, _, tokenized_text_with_unk, label_str = line
+                    _, sentence, label_str = line.strip().split('\t')
                     dataset = {
-                        "tokenized_text_with_unk" : tokenized_text_with_unk,
+                        "sentence" : sentence,
                         "label_str" : label_str
                     }
                     dataset_list.append(dataset)
     else:#inference 시에 입력이 들어올 때
         for text in texts:
-            tokenizer = KobortTokenizer("wp-mecab")
-            tokens_with_unk, tokens_without_unk, _ = tokenizer.tokenize(text)
+            tokenizer = KobortTokenizer(args.tokenizer_type)
+            tokens_without_unk = tokenizer.tokenize(text)[1]
             tokenized_text_without_unk = ' '.join(tokens_without_unk)
-            tokenized_text_with_unk = ' '.join(tokens_with_unk)
+            sentence = tokenized_text_without_unk
             dataset = {
-                "tokenized_text" : tokenized_text_without_unk,
-                "tokenized_text_with_unk" : tokenized_text_with_unk,
+                "sentence" : sentence,
                 "label_str" : None
             }
             dataset_list.append(dataset)

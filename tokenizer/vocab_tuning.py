@@ -6,7 +6,7 @@ def create_directory(directory):
     except OSError: 
         print("Error: Failed to create the directory.")
 
-with open('model/wordpiece/version_2.4/vocab.txt', 'r', encoding='utf-8') as f:
+with open('model/wordpiece/version_2.2/vocab.txt', 'r', encoding='utf-8') as f:
     subwords = f.read().split('\n')
 
 #subwords에는 중복되는 서브워드가 없어야 함
@@ -17,7 +17,7 @@ for subword in subwords:
     if '♬' in subword:
         if subword == '♬':
             pass
-        elif subword[0] == '♬' and ('♬' not in subword[1:]):  #두 글자 이상의 ♬가 들어가 서브워드에 대해서
+        elif subword[0] == '♬' and ('♬' not in subword[1:]):  #두 글자 이상의 ♬가 들어간 서브워드에 대해서
             #특수 문자를 이제 wordpiece 구분자인 ##으로 변경 (어짜피 조사나 XSN은 명사 뒤에 붙는 말이기 때문에 ##붙음)
             new_subword = '##'+subword[1:]
             #new_subwords.append(new_subword)
@@ -37,7 +37,7 @@ for subword in subwords:
             new_subwords.append(subword)#단어 넣고
             check_double[subword] = 1 #이제는 있는 단어라고 표시
 
-vocab_path = 'model/wordpiece/version_2.4.1/'
+vocab_path = 'model/wordpiece/version_2.2.12/'
 create_directory(vocab_path)
 
 with open(vocab_path+'vocab.txt', 'w', encoding='utf-8') as f:

@@ -6,6 +6,86 @@ python data_processing.py \
 python data_processing.py \
     --tokenizer_type wp
 
+
+CUDA_VISIBLE_DEVICES=4 python train.py \
+    --model_path /data/bowon_ko/TRoBERTa_BASE/data_2.1_wp_2.2.11/checkpoint-2000000 \
+    --batch_size 32 \
+    --max_length 128 \
+    --save_path /data/bowon_ko/TRoBERTa_BASE/data_2.1_wp_2.2.11/ner/first \
+    --tokenizer_type wp_vtuning \
+    --train_file jupyter/data/vtuning_duplicate_train.tsv \
+    --dev_file jupyter/data/vtuning_duplicate_test.tsv \
+    --test_file jupyter/data/vtuning_duplicate_dev.tsv 
+
+CUDA_VISIBLE_DEVICES=5 python train.py \
+    --model_path /data/bowon_ko/TRoBERTa_BASE/data_2.1_wp_2.2.11/checkpoint-4000000 \
+    --batch_size 32 \
+    --max_length 128 \
+    --save_path /data/bowon_ko/TRoBERTa_BASE/data_2.1_wp_2.2.11_4M/ner/first \
+    --tokenizer_type wp_vtuning \
+    --train_file jupyter/data/vtuning_duplicate_train.tsv \
+    --dev_file jupyter/data/vtuning_duplicate_test.tsv \
+    --test_file jupyter/data/vtuning_duplicate_dev.tsv 
+
+CUDA_VISIBLE_DEVICES=6 python train.py \
+    --model_path /data/bowon_ko/TRoBERTa_BASE/data_2.1_wp_2.2.2/checkpoint-2000000 \
+    --batch_size 32 \
+    --max_length 128 \
+    --save_path /data/bowon_ko/TRoBERTa_BASE/data_2.1_wp_2.2.2/ner/first \
+    --tokenizer_type wp \
+    --train_file jupyter/data/wp_duplicate_train.tsv \
+    --dev_file jupyter/data/wp_duplicate_test.tsv \
+    --test_file jupyter/data/wp_duplicate_dev.tsv
+
+
+python train.py \
+    --model_path /data/bowon_ko/TRoBERTa_BASE/data_2.1_wp_2.2.11/checkpoint-2000000 \
+    --batch_size 32 \
+    --max_length 128 \
+    --save_path /data/bowon_ko/TRoBERTa_BASE/data_2.1_wp_2.2.11/ner \
+    --tokenizer_type wp_vtuning \
+    --train_file jupyter/data/vtuning_train.tsv \
+    --dev_file jupyter/data/vtuning_validation.tsv \
+    --test_file jupyter/data/vtuning_test.tsv    
+
+CUDA_VISIBLE_DEVICES=6 python train.py \
+    --model_path /data/bowon_ko/TRoBERTa_BASE/data_2.1_wp_2.2.11/checkpoint-4000000 \
+    --batch_size 32 \
+    --max_length 128 \
+    --save_path /data/bowon_ko/TRoBERTa_BASE/data_2.1_wp_2.2.11_4M/ner \
+    --tokenizer_type wp_vtuning \
+    --train_file jupyter/data/vtuning_train.tsv \
+    --dev_file jupyter/data/vtuning_validation.tsv \
+    --test_file jupyter/data/vtuning_test.tsv
+
+CUDA_VISIBLE_DEVICES=6 python train.py \
+    --model_path /data/bowon_ko/TRoBERTa_BASE/data_2.1_wp_2.2.2/checkpoint-2000000 \
+    --batch_size 32 \
+    --max_length 128 \
+    --save_path /data/bowon_ko/TRoBERTa_BASE/data_2.1_wp_2.2.2/ner \
+    --tokenizer_type wp \
+    --train_file jupyter/data/wp_train.tsv \
+    --dev_file jupyter/data/wp_validation.tsv \
+    --test_file jupyter/data/wp_test.tsv
+    
+CUDA_VISIBLE_DEVICES=7 python train.py \
+    --model_path /data/bowon_ko/TRoBERTa_BASE/210727/pretrain/checkpoint-2000000/ \
+    --batch_size 32 \
+    --max_length 128 \
+    --save_path /data/bowon_ko/TRoBERTa_BASE/210727/ner \
+    --tokenizer_type wp-mecab \
+    --train_file jupyter/data/wp-mecab_train.tsv \
+    --dev_file jupyter/data/wp-mecab_validation.tsv \
+    --test_file jupyter/data/wp-mecab_test.tsv
+
+python train.py \
+    --model_path /data/bowon_ko/TRoBERTa_BASE/data_2.1_wp_2.2.2/checkpoint-2000000 \
+    --batch_size 32 \
+    --max_length 128 \
+    --save_path /data/bowon_ko/TRoBERTa_BASE/data_2.1_wp_2.2.2/new \
+    --tokenizer_path
+
+
 python train.py \
     --model_path /data/bowon_ko/TRoBERTa_BASE/210727/pretrain/checkpoint-2000000/ \
     --batch_size 32 \

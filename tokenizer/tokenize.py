@@ -1,7 +1,8 @@
 from transformers import BertTokenizer,AlbertTokenizer
 from konlpy.tag import Mecab
 
-wordpiece_info = {"vocab_path" : "tokenizer/model/wordpiece/version_2.4.1"}#1.4
+wordpiece_info = {"vocab_path" : "/home/ubuntu/bowon/kobort/tokenizer/model/wordpiece/version_2.2.2/"}#1.4
+wordpiece_vtuning_info = {"vocab_path" : "/home/ubuntu/bowon/kobort/tokenizer/model/wordpiece/version_2.2.11/"}#1.4
 
 wordpiece_mecab_info = {"vocab_path" : "tokenizer/model/wordpiece_mecab/version_1.9"}
 
@@ -27,7 +28,9 @@ class KobortTokenizer:
             if self.model_name == "wp-mecab":
                 tokenizer_path = wordpiece_mecab_info["vocab_path"]
             elif self.model_name == "wp":
-                tokenizer_path = wordpiece_info["vocab_path"] #vocab이 형태소를 반영한 상태로 더 잘 되어 있을 거라 예상
+                tokenizer_path = wordpiece_info["vocab_path"] 
+            elif self.model_name == "wp_vtuning":
+                 tokenizer_path = wordpiece_vtuning_info["vocab_path"]
             self.tokenizer = BertTokenizer.from_pretrained(tokenizer_path, 
                                                   do_lower_case=False,
                                                   unk_token='<unk>',

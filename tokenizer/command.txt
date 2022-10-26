@@ -5,7 +5,29 @@
 2.4 : 27000
 
 python train_wordpiece.py \
-  --data_path /data/bowon_ko/data/crawling/Dataset_fin/preprocess_complete2/josa/train_tok_2.1.txt \
+  --data_path /data/bowon/data/crawling/Dataset_fin/preprocess_complete2/josa/train_tok_2.1.txt \
   --tokenizer_type wp \
-  --vocab_dir /home/ubuntu/bowon_ko/kobort/tokenizer/model/wordpiece/version_2.4/ \
+  --vocab_dir /home/ubuntu/bowon/kobort/tokenizer/model/wordpiece/version_2.4/ \
   --vocab_size 27000
+  
+  
+  
+python train_wordpiece.py \
+  --data_path /data/bowon/data/crawling/Dataset_fin/preprocess_complete2/pretrain_2.1.txt \
+  --tokenizer_type wp \
+  --vocab_dir /home/ubuntu/bowon/kobort/tokenizer/model/wordpiece/version_2.2.2/ \
+  --vocab_size 32000
+  
+
+  
+python train_wordpiece.py \
+  --data_path /data/bowon/data/crawling/Dataset_fin/preprocess_complete2/josa/train_tok_2.1.txt \
+  --tokenizer_type wp \
+  --vocab_dir /home/ubuntu/bowon/kobort/tokenizer/model/wordpiece/version_2.6/ \
+  --vocab_size 40000
+  
+
+python vocab_tuning_v2.py \
+    --wp_path /home/ubuntu/bowon/kobort/tokenizer/model/wordpiece/version_2.6/ \
+    --vtuning_path /home/ubuntu/bowon/kobort/tokenizer/model/wordpiece/version_2.6.11/
+

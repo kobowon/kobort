@@ -9,18 +9,19 @@ from transformers import BertTokenizer
 from transformers import BertForTokenClassification, RobertaForTokenClassification, AdamW, RobertaConfig
 from transformers import get_linear_schedule_with_warmup
 from fastprogress.fastprogress import master_bar, progress_bar
+from tokenizer import KobortTokenizer
 
-os.environ["CUDA_VISIBLE_DEVICES"]="1"
+os.environ["CUDA_VISIBLE_DEVICES"]="6"
 
 def train(args):
     #Set GPU
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     
     #Load tokenizer
-    tokenizer = KobortTokenizer("wp-mecab").tokenizer
+    tokenizer = KobortTokenizer(args.tokenizer_type).tokenizer
     
     #Build dataloader
-    entity_label_list, train_data = make_ner_data(args.train_file, tokenizer)
+    entity_label_list, train_data = make_ner_data(args, args.train_file, tokenizer)
     #sampelr 처리 못함
     kwargs = (
         {"num_workers":torch.cuda.device_count(), "pin_memory":True} if torch.cuda.is_available()
@@ -140,7 +141,7 @@ def evaluate(args, model, tokenizer, eval_type='dev'): #dev, test
         print("\ntest step\n")
     
     #Build dataloader
-    entity_label_list, data = make_ner_data(data_file, tokenizer)
+    entity_label_list, data = make_ner_data(args, data_file, tokenizer)
     id2label = {str(i):label for i, label in enumerate(entity_label_list)}
     
     #sampelr 처리 못함
@@ -219,13 +220,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--save_path", 
         type=str, 
-        default='/data/bowon_ko/TRoBERTa_BASE/220103/finetune/ner/'
-    )
-    
-    parser.add_argument(
-        "--tokenizer_path",
-        type=str,
-        default="./tokenizer/model/wordpiece_mecab/version_1.9"
+        default='/data/bowon_ko/TRoBERTa_BASE/210727/ner/'
     )
         
     parser.add_argument(
@@ -237,7 +232,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--dev_file",
         type=str,
-        default="jupyter/data/val.tsv"
+        default="jupyter/data/validation.tsv"
     )
     
     parser.add_argument(
@@ -281,6 +276,12 @@ if __name__ == "__main__":
         "--seed",
         type=int,
         default=42
+    )
+    
+    parser.add_argument(
+        "--tokenizer_type",
+        type=str,
+        default="wp"
     )
     
     args = parser.parse_args()

@@ -42,7 +42,7 @@ class NerDataset(Dataset):
     #dataset[i]에서 접근가능한 객체들 반환
     def __getitem__(self, i):
         instance = self.dataset[i]
-        sentence = instance['tokenized_text_with_unk']
+        sentence = instance['sentence']
         label_str = instance['label_str']
         return sentence, label_str
 
